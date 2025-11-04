@@ -1,0 +1,63 @@
+GET 
+http://localhost:3000/tasks/1
+
+{
+    "id": 1,
+    "title": "Learn Node.js",
+    "completed": false,
+    "priority": "high",
+    "createdAt": "2025-11-04T14:46:38.764Z"
+}
+
+GET 
+http://localhost:3000/tasks/2
+
+{
+    "id": 2,
+    "title": "Build REST API",
+    "completed": false,
+    "priority": "medium",
+    "createdAt": "2025-11-04T14:46:38.764Z"
+}
+
+
+GET 
+http://localhost:3000/tasks/3
+
+{
+    "id": 3,
+    "title": "Learn MySQL",
+    "completed": false,
+    "priority": "high",
+    "createdAt": "2025-11-04T14:46:38.764Z"
+}
+
+GET 
+http://localhost:3000/tasks/4
+
+{
+    "id": 4,
+    "title": "Setup Postman",
+    "completed": true,
+    "priority": "low",
+    "createdAt": "2025-11-04T14:46:38.764Z"
+}
+
+GET 
+http://localhost:3000/tasks/5
+
+{
+    "id": 5,
+    "title": "Practice Git",
+    "completed": false,
+    "priority": "medium",
+    "createdAt": "2025-11-04T14:46:38.764Z"
+}
+
+
+
+GET 
+http://localhost:3000/tasks/99
+{
+    "error": "Task not found"
+}
