@@ -92,3 +92,90 @@ Response:
   "status": "healthy",
   "uptime": 12.345678
 }
+
+POST /tasks — How to Test (Postman Guide)
+Endpoint
+POST http://localhost:3000/tasks
+
+Headers
+Content-Type: application/json
+
+Request Body Format
+
+Send raw JSON:
+
+{
+  "title": "Your task title"
+}
+Successful Request Example
+
+Request Body:
+
+{
+  "title": "Buy groceries"
+}
+
+
+Expected Response (201 Created):
+
+{
+  "success": true,
+  "data": {
+    "id": 1731569201234,
+    "title": "Buy groceries",
+    "completed": false
+  }
+}
+Error Handling Notes (Important)
+
+The server validates the title field.
+Test these cases in Postman:
+
+1. Missing title
+
+Body:
+
+{}
+
+
+Expected Response:
+
+Status: 400
+
+{
+  "success": false,
+  "error": "Title is required and must be a non-empty string"
+}
+
+2. Empty title
+
+Body:
+
+{
+  "title": " "
+}
+
+
+Expected Response:
+
+Status: 400
+
+{
+  "success": false,
+  "error": "Title is required and must be a non-empty string"
+}
+
+3. Invalid JSON (syntax error)
+
+Body (broken JSON):
+
+{"title":
+
+
+Expected Response (Express default):
+
+Status: 400
+
+{
+  "error": "Invalid JSON"
+}
