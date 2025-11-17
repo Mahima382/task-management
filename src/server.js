@@ -14,9 +14,11 @@ app.use(express.json()); // Parses application/json
 
 // 5️⃣ In-memory task storage (temporary)
 const tasks = [
-  { id: 1, title: 'Sample Task1', completed: false },
-  { id: 2, title: 'Sample Task2', completed: true },
-  { id: 3, title: 'Sample Task3', completed: false }
+  { id: 1, title: "Learn Node.js", completed: false, priority: "high", createdAt: new Date() },
+  { id: 2, title: "Build REST API", completed: false, priority: "medium", createdAt: new Date() },
+  { id: 3, title: "Learn MySQL", completed: false, priority: "high", createdAt: new Date() },
+  { id: 4, title: "Setup Postman", completed: true, priority: "low", createdAt: new Date() },
+  { id: 5, title: "Practice Git", completed: false, priority: "medium", createdAt: new Date() }
 ];
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && 'body' in err) {
@@ -28,6 +30,8 @@ app.use((err, req, res, next) => {
   }
   next();
 });
+
+
 // 6️⃣ Make tasks available to routes
 app.locals.tasks = tasks;
 
