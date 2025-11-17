@@ -31,6 +31,13 @@ app.use((err, req, res, next) => {
   next();
 });
 
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    uptime: process.uptime()   // Seconds the server has been running
+  });
+});
 
 // 6️⃣ Make tasks available to routes
 app.locals.tasks = tasks;
