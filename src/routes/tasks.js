@@ -16,15 +16,16 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Base SQL queries
-    let sql = 'SELECT * FROM tasks';
-    let countSql = 'SELECT COUNT(*) AS total FROM tasks';
+    let sql = 'SELECT * FROM tasks WHERE deleted_at IS NULL';
+    let countSql = 'SELECT COUNT(*) AS total FROM tasks WHERE deleted_at IS NULL';
+
     const params = [];
 
     // Search by title
     if (q) {
-      sql += ' WHERE title LIKE ?';
-      countSql += ' WHERE title LIKE ?';
-      params.push(`%${q}%`);
+       sql += ' AND title LIKE ?';
+       countSql += ' AND title LIKE ?';
+       params.push(`%${q}%`);
     }
 
     // Add pagination
@@ -45,8 +46,19 @@ router.get('/', async (req, res) => {
       data: rows
     });
 
+
   } catch (err) {
     console.error('Pagination route error:', err);  // <--- VERY IMPORTANT
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+    // Get all soft-deleted tasks
+router.get('/deleted', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM tasks WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC');
+    res.json({ totalDeleted: rows.length, data: rows });
+  } catch (err) {
+    console.error('Get deleted tasks error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -93,18 +105,43 @@ console.error(err);
 res.status(500).json({ error: 'Failed to update task' });
 }
 });
-// DELETE task
-router.delete('/:id', async (req, res) => {
-const { id } = req.params;
-try {
-const [result] = await db.query('DELETE FROM tasks WHERE id = ?', [id]);
-if (result.affectedRows === 0) {
-return res.status(404).json({ error: 'Task not found' });
-}
-res.status(204).send();
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: 'Failed to delete task' });
-}
+
+// Restore a soft-deleted task
+router.put('/:id/restore', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query(
+      'UPDATE tasks SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL',
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Task not found or not deleted' });
+    }
+    const [restoredTask] = await db.query('SELECT * FROM tasks WHERE id = ?', [id]);
+    res.json(restoredTask[0]);
+  } catch (err) {
+    console.error('Restore task error:', err);
+    res.status(500).json({ error: 'Failed to restore task' });
+  }
 });
+
+// DELETE task
+// Soft delete task
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query(
+      'UPDATE tasks SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL',
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Task not found or already deleted' });
+    }
+    res.status(204).send(); // Success
+  } catch (err) {
+    console.error('Soft delete error:', err);
+    res.status(500).json({ error: 'Failed to delete task' });
+  }
+});
+
 module.exports = router;
