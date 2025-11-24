@@ -12,14 +12,10 @@ const app = express();
 // 4️⃣ Middleware to parse JSON requests
 app.use(express.json()); // Parses application/json
 
-// 5️⃣ In-memory task storage (temporary)
-const tasks = [
-  { id: 1, title: "Learn Node.js", completed: false, priority: "high", createdAt: new Date() },
-  { id: 2, title: "Build REST API", completed: false, priority: "medium", createdAt: new Date() },
-  { id: 3, title: "Learn MySQL", completed: false, priority: "high", createdAt: new Date() },
-  { id: 4, title: "Setup Postman", completed: true, priority: "low", createdAt: new Date() },
-  { id: 5, title: "Practice Git", completed: false, priority: "medium", createdAt: new Date() }
-];
+// 5️⃣ hardcored db
+const taskRoutes = require('./routes/tasks');
+app.use('/tasks', taskRoutes);
+
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && 'body' in err) {
     // Force return 500 as your assignment wants
