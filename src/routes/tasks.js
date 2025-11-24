@@ -3,14 +3,54 @@ const router = express.Router();
 const db = require('../config/db');
 // GET all tasks
 router.get('/', async (req, res) => {
-try {
-const [rows] = await db.query('SELECT * FROM tasks ORDER BY created_at DESC');
-res.json(rows);
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: 'Database error' });
-}
+  try {
+    // Get query params with defaults
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    const q = req.query.q || null;
+
+    if (page < 1) page = 1;
+    if (limit < 1) limit = 10;
+    if (limit > 50) limit = 50;
+
+    const offset = (page - 1) * limit;
+
+    // Base SQL queries
+    let sql = 'SELECT * FROM tasks';
+    let countSql = 'SELECT COUNT(*) AS total FROM tasks';
+    const params = [];
+
+    // Search by title
+    if (q) {
+      sql += ' WHERE title LIKE ?';
+      countSql += ' WHERE title LIKE ?';
+      params.push(`%${q}%`);
+    }
+
+    // Add pagination
+    sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    // Execute queries
+    const [rows] = await db.query(sql, params);
+    const [countResult] = await db.query(countSql, q ? [`%${q}%`] : []);
+    const totalTasks = countResult[0].total;
+    const totalPages = Math.ceil(totalTasks / limit);
+
+    res.json({
+      totalTasks,
+      totalPages,
+      currentPage: page,
+      limit,
+      data: rows
+    });
+
+  } catch (err) {
+    console.error('Pagination route error:', err);  // <--- VERY IMPORTANT
+    res.status(500).json({ error: 'Database error' });
+  }
 });
+
 // POST create new task
 router.post('/', async (req, res) => {
 const { title, description } = req.body;

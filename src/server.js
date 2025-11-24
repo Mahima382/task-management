@@ -35,8 +35,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 6️⃣ Make tasks available to routes
-app.locals.tasks = tasks;
+
 
 // 7️⃣ Mount your router AFTER app is created
 app.use('/tasks', taskRouter);
